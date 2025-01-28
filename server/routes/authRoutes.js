@@ -61,6 +61,7 @@ const verifyToken = async (req, res, next) => {
             return res.status(403).json({message: "No Token Provided"})
         }
         const decoded = jwt.verify(token, process.env.JWT_KEY)
+        console.log('Decoded token:', decoded); // Debug log to check the decoded token
         req.userId = decoded.id;
         next()
     }  catch(err) {

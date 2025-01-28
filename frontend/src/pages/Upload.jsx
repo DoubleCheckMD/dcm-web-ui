@@ -5,41 +5,52 @@ import './Upload.css'; // Import the CSS file
 
 
 const Upload = () => {
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
   const navigate = useNavigate();
+  const [files, setFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [error, setError] = useState('');
+
+
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-    setPreview(URL.createObjectURL(selectedFile));
+    const selectedFiles = Array.from(e.target.files);
+    setFiles(selectedFiles);
+    setPreviews(selectedFiles.map(file => URL.createObjectURL(file)));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) {
-      console.error('No file selected');
+    if (files.length === 0) {
+      setError('No files selected');
       return;
     }
 
     const formData = new FormData();
-    formData.append('photo', file);
+   files.forEach(file => formData.append('photos', file));
 
     try {
+      const token = localStorage.getItem('token')
       const response = await axios.post('http://localhost:3000/upload', formData, {
         headers: {
+          "Authorization" : `Bearer ${token}`, // Include the token in the Authorization header
           'Content-Type': 'multipart/form-data',
         },
       });
       console.log('Response:', response); // Log the response
       if (response.status === 200) {
         console.log('File uploaded successfully');
+        setFiles([]);
+        setPreviews([]);
+        setError('');
         navigate('/success'); // Navigate to success page
       } else {
         console.error('Upload failed with status:', response.status);
       }
     } catch (err) {
       console.log(err.message);
+      setError('Error uploading files');
+      setUploadStatus('');
     }
   };
 
@@ -47,19 +58,22 @@ const Upload = () => {
     <div>
      
     <div className='upload-container'>
-       {preview && (
-      <div className='photo-preview'>
-        <h2>Selected Photo:</h2>
-        <img src={preview} alt="Selected" className='uploaded-photo' />
-      </div>
-    )}
+     {previews.length > 0 && (
+          <div className='photo-preview'>
+            <h2>Selected Photos:</h2>
+            {previews.map((preview, index) => (
+              <img key={index} src={preview} alt="Selected" className='uploaded-photo' />
+            ))}
+          </div>
+        )}
     <form onSubmit={handleSubmit} className='upload-form'>
       <input type="file" onChange={handleFileChange} />
       <button type="submit" className="upload-button">
         Upload
       </button>
     </form>
-   
+    {uploadStatus && <p>{uploadStatus}</p>}
+    {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
     </div>
   );
