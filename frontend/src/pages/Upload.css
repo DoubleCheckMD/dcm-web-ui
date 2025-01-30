@@ -1,18 +1,19 @@
 .upload-button {
-  background-color: blue;
-  color: white;
+  background-color: white;
+  color: black;
   cursor: pointer;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
-  border-radius: 5px;
-  margin-top: 10px; /* Add space above the upload button */
+  border-radius: 10px;
+  margin-top: 10px;
+  border:1px solid black;
 }
 
-.upload-button:hover {
+/* .upload-button:hover {
   background-color: darkblue;
   
-}
+} */
 
 .upload-container {
   display: flex;

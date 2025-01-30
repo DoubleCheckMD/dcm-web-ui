@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Upload.css'; // Import the CSS file
-
+import UserProfileHeader from '../components/UserProfileHeader'; // Import the UserProfileHeader component
+import useFetchUser from '../utils/useFetchUser'; // Import the custom hook
 
 const Upload = () => {
   const navigate = useNavigate();
@@ -10,8 +11,7 @@ const Upload = () => {
   const [previews, setPreviews] = useState([]);
   const [uploadStatus, setUploadStatus] = useState('');
   const [error, setError] = useState('');
-
-
+  const user = useFetchUser(); // Use the custom hook to fetch user data
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -56,7 +56,7 @@ const Upload = () => {
 
   return (
     <div>
-     
+    <UserProfileHeader user={user} /> {/* Use the UserProfileHeader component */}
     <div className='upload-container'>
      {previews.length > 0 && (
           <div className='photo-preview'>
@@ -69,7 +69,7 @@ const Upload = () => {
     <form onSubmit={handleSubmit} className='upload-form'>
       <input type="file" onChange={handleFileChange} />
       <button type="submit" className="upload-button">
-        Upload
+        LOAD FILE
       </button>
     </form>
     {uploadStatus && <p>{uploadStatus}</p>}

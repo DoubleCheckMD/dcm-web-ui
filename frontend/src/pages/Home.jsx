@@ -1,39 +1,20 @@
-import axios from 'axios'
-import React, { useEffect, useContext } from 'react'
-import { useNavigate,Link } from 'react-router-dom'
-
+import React from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import useFetchUser from '../utils/useFetchUser'; // Import the custom hook
+import UserProfileHeader from '../components/UserProfileHeader'; // Import the UserProfileHeader component
 
 const Home = () => {
-  const navigate = useNavigate()
-  const fetchUser = async () => {
-    try {
-      const token = localStorage.getItem('token')
-      const response = await axios.get('http://localhost:3000/auth/home', {
-        headers: {
-          "Authorization" : `Bearer ${token}`
-        }
-      })
-      if(response.status !== 201) {
-        navigate('/login')
-      }
-    } catch(err){
-      navigate('/login')
-      console.log(err)
-    }
-  }
+  const navigate = useNavigate();
+  const user = useFetchUser(); // Use the custom hook to fetch user data
 
-  useEffect(() => {
-    fetchUser()
-  }, [])
-
-  
   return (
     <div>
-      {/* <h1 className='text-3xl text-blue-500'>Home</h1> */}
-      {/* <Upload /> */}
-      <Link to="/upload" className="text-blue-500">Upload Photo</Link> {/* Add the link */}
+      <UserProfileHeader user={user} /> {/* Use the UserProfileHeader component */}
+      <div style={{ padding: '10px' }}>
+        <Link to="/upload" className="text-blue-500">Upload Photo</Link>
+      </div>
     </div>
   );
-}
+};
 
-export default Home
+export default Home;
