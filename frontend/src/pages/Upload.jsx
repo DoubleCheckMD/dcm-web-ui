@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./Upload.css"; // Import the CSS file
 import UserProfileHeader from "../components/UserProfileHeader"; // Import the UserProfileHeader component
 import useFetchUser from "../utils/useFetchUser"; // Import the custom hook
-import handleQuestionSubmit from "../components/Upload/handleQuestionSubmit";
+import { Document, Page } from "react-pdf";
 
 const Upload = () => {
   const navigate = useNavigate();
@@ -16,11 +16,36 @@ const Upload = () => {
   const [numPages, setNumPages] = useState(null);
   const [question, setQuestion] = useState("");
   const [response, setResponse] = useState("");
+  const [fetching, setFetching] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     setFiles(selectedFiles);
     setPreviews(selectedFiles.map((file) => URL.createObjectURL(file)));
+  };
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+  };
+  const handleQuestionSubmit = async () => {
+    if (!question.trim()) {
+      alert("Please enter a question");
+      return;
+    }
+
+    try {
+      setFetching(true);
+      const res = await axios.post("http://localhost:3000/ask-ai", {
+        question,
+      });
+
+      setResponse(res.data.aiResponse);
+    } catch (error) {
+      console.error("GPT API Error:", error);
+      setResponse("Error fetching response.");
+    } finally {
+      setFetching(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -29,15 +54,7 @@ const Upload = () => {
       setError("No files selected");
       return;
     }
-
-    const onDocumentLoadSuccess = ({ numPages }) => {
-      setNumPages(numPages);
-    };
-
-    const handleQuestionSubmit = () => {
-      setResponse(`Fetching answer for: ${handleQuestionSubmit}`); // Replace with actual GPT API call
-    };
-  
+   
     const formData = new FormData();
     files.forEach((file) => formData.append("photos", file));
 
@@ -121,8 +138,14 @@ const Upload = () => {
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Ask a question about the file..."
             />
-            <button type="submit" className="mt-2" >
-              Send
+            <button 
+              disabled={fetching}
+              type="submit" 
+              className="mt-2" 
+              onClick={handleQuestionSubmit} 
+              // className={'${fetching ? "bg-gray-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 fous:outline-none focuse:ring-2 focus:ring-blue-600 focus:ring-opacity-50"} mt-4 px-4 py-2 text-white rounded-md'}
+              >
+              {fetching ? "Fetching AI Reponse" : "Send Question"}
             </button>
             <div className="mt-4 p-2 border rounded-lg bg-gray-50">
               {response}
