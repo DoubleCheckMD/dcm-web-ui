@@ -17,6 +17,16 @@ const Upload = () => {
   const [question, setQuestion] = useState("");
   const [response, setResponse] = useState("");
   const [fetching, setFetching] = useState(false);
+  const [responses, setResponses] = useState([]);
+
+ 
+   const [conversations, setConversations] = useState([
+    {
+      id: 0,
+      question: "",
+      answer: "",
+      subQuestions: [],}
+  ]);
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -27,26 +37,82 @@ const Upload = () => {
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
   };
-  const handleQuestionSubmit = async () => {
+  const handleQuestionSubmit = async (parentId = null, questionText = question) => {
     if (!question.trim()) {
       alert("Please enter a question");
       return;
     }
 
+    if (files.
+      length === 0) {
+      alert("Please upload a file first");
+      return;
+    }
+
     try {
       setFetching(true);
+
+      // const formData = new FormData();
+      // formData.append("question", question);
+      // formData.append("file", files[0]); // Sending the first uploaded file
+  
+      // const res = await axios.post("http://localhost:3000/ask-ai", formData, {
+      //   headers: {
+      //     "Content-Type": "multipart/form-data",
+      //   },
+      // });
+
       const res = await axios.post("http://localhost:3000/ask-ai", {
-        question,
+        question: questionText,
+        parentId: parentId // Pass parentId if it's a follow-up
       });
 
-      setResponse(res.data.aiResponse);
+    // Log the API response to check the returned answer
+    console.log("API Response:", res.data);
+
+
+      const newResponse = {
+        id: res.data.id || new Date().getTime(), // Use timestamp if ID is missing
+        question: questionText,
+        answer: res.data.aiResponse,
+        parentId: parentId || null, // Link to previous question if it's a follow-up
+        subQuestions: [],
+      };
+
+      setConversations((prevConversations) => {
+        if (parentId === null) {
+          return [ newResponse, ...prevConversations]; // New conversation
+        }
+        return prevConversations.map((conv) =>
+          conv.id === parentId
+            ? { ...conv, subQuestions: [newResponse, ...conv.subQuestions] }
+            : conv
+        );
+      });  
+
+    setQuestion(""); // Clear input after submission
+   
     } catch (error) {
       console.error("GPT API Error:", error);
+     
       setResponse("Error fetching response.");
     } finally {
       setFetching(false);
     }
   };
+
+// Recursive function to render threaded Q&A
+const renderConversations = (convos, parentId = null) => {
+  return convos.map((conv) => (
+    <div key={conv.id} className=" rounded-lg bg-gray-50 mt-2">
+      <div className="flex items-center">
+        <span className="font-bold">{conv.question}</span>
+      </div>
+      <div className="ml-2">{conv.answer}</div>
+      <div className="ml-2">{renderConversations(conv.subQuestions, conv.id)}</div>
+    </div>
+  ));
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -140,16 +206,20 @@ const Upload = () => {
             />
             <button 
               disabled={fetching}
-              type="submit" 
+             // type="submit" 
               className="mt-2" 
-              onClick={handleQuestionSubmit} 
-              // className={'${fetching ? "bg-gray-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 fous:outline-none focuse:ring-2 focus:ring-blue-600 focus:ring-opacity-50"} mt-4 px-4 py-2 text-white rounded-md'}
+              //onClick={handleQuestionSubmit} 
+              onClick={() => handleQuestionSubmit(null)}
               >
               {fetching ? "Fetching AI Reponse" : "Send Question"}
             </button>
             <div className="mt-4 p-2 border rounded-lg bg-gray-50">
-              {response}
+              {/* {response} */}
+              {/* Render conversations */}
+    {renderConversations(conversations)}
+             
             </div>
+             
           </div>
         </div>
       </div>
