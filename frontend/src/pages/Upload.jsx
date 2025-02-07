@@ -18,15 +18,8 @@ const Upload = () => {
   const [response, setResponse] = useState("");
   const [fetching, setFetching] = useState(false);
   const [responses, setResponses] = useState([]);
+  const [conversations, setConversations] = useState([]);
 
- 
-   const [conversations, setConversations] = useState([
-    {
-      id: 0,
-      question: "",
-      answer: "",
-      subQuestions: [],}
-  ]);
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -37,7 +30,7 @@ const Upload = () => {
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
   };
-  const handleQuestionSubmit = async (parentId = null, questionText = question) => {
+  const handleQuestionSubmit = async () => {
     if (!question.trim()) {
       alert("Please enter a question");
       return;
@@ -48,54 +41,23 @@ const Upload = () => {
       alert("Please upload a file first");
       return;
     }
-
+   
     try {
       setFetching(true);
-
-      // const formData = new FormData();
-      // formData.append("question", question);
-      // formData.append("file", files[0]); // Sending the first uploaded file
-  
-      // const res = await axios.post("http://localhost:3000/ask-ai", formData, {
-      //   headers: {
-      //     "Content-Type": "multipart/form-data",
-      //   },
-      // });
-
-      const res = await axios.post("http://localhost:3000/ask-ai", {
-        question: questionText,
-        parentId: parentId // Pass parentId if it's a follow-up
-      });
-
-    // Log the API response to check the returned answer
-    console.log("API Response:", res.data);
-
+      const res = await axios.post("http://localhost:3000/ask-ai", { question });
 
       const newResponse = {
-        id: res.data.id || new Date().getTime(), // Use timestamp if ID is missing
-        question: questionText,
-        answer: res.data.aiResponse,
-        parentId: parentId || null, // Link to previous question if it's a follow-up
-        subQuestions: [],
+        id: new Date().getTime(),
+        question,
+        answer: res.data.aiResponse || "No response",
       };
 
-      setConversations((prevConversations) => {
-        if (parentId === null) {
-          return [ newResponse, ...prevConversations]; // New conversation
-        }
-        return prevConversations.map((conv) =>
-          conv.id === parentId
-            ? { ...conv, subQuestions: [newResponse, ...conv.subQuestions] }
-            : conv
-        );
-      });  
-
-    setQuestion(""); // Clear input after submission
+      setConversations((prev) => [...prev, newResponse]);
+      setQuestion("");
    
     } catch (error) {
       console.error("GPT API Error:", error);
      
-      setResponse("Error fetching response.");
     } finally {
       setFetching(false);
     }
@@ -197,29 +159,48 @@ const renderConversations = (convos, parentId = null) => {
               </div>
             )}
           </div>
-          <div className="w-1/2 border p-4 bg-white rounded-lg">
-            <input
-              type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Ask a question about the file..."
-            />
-            <button 
-              disabled={fetching}
-             // type="submit" 
-              className="mt-2" 
-              //onClick={handleQuestionSubmit} 
-              onClick={() => handleQuestionSubmit(null)}
-              >
-              {fetching ? "Fetching AI Reponse" : "Send Question"}
-            </button>
-            <div className="mt-4 p-2 border rounded-lg bg-gray-50">
-              {/* {response} */}
-              {/* Render conversations */}
-    {renderConversations(conversations)}
-             
+          {/* Input Box */}
+
+          {/* Right Section - Chat UI */}
+          <div className="w-1/2 flex flex-col p-6 bg-white shadow-lg">
+            <h2 className="text-lg font-semibold mb-4">Chat with AI</h2>
+            <div className="flex-1 overflow-auto space-y-4 p-4 border rounded-lg bg-gray-50 h-[500px]">
+              {conversations.map((conv) => (
+                <div key={conv.id} className="flex flex-col space-y-2">
+                {conv.question && (
+                  <div className="flex justify-end">
+                    <div className="bg-gray-500 text-black p-3 rounded-lg max-w-xs text-right">
+                      {conv.question}
+                    </div>
+                  </div>
+                )}
+                {conv.answer && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-300 text-black p-3 rounded-lg max-w-xs text-left">
+                      {conv.answer}
+                    </div>
+                  </div>
+                )}
+              </div>
+              ))}
+              {fetching && <p className="text-gray-500">AI is thinking...</p>}
             </div>
-             
+            <div className="mt-4 flex">
+              <input
+                type="text"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                className="flex-1 p-2 border rounded-lg"
+                placeholder="Ask a question..."
+              />
+              <button
+                onClick={handleQuestionSubmit}
+                className="ml-2 bg-blue-500 text-white p-2 rounded-lg"
+                disabled={fetching}
+              >
+                {fetching ? "Thinking..." : "Send"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
