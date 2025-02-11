@@ -20,7 +20,6 @@ const Upload = () => {
   const [responses, setResponses] = useState([]);
   const [conversations, setConversations] = useState([]);
 
-
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     setFiles(selectedFiles);
@@ -36,15 +35,24 @@ const Upload = () => {
       return;
     }
 
-    if (files.
-      length === 0) {
+    if (files.length === 0) {
       alert("Please upload a file first");
       return;
     }
-   
+
     try {
       setFetching(true);
-      const res = await axios.post("http://localhost:3000/ask-ai", { question });
+      const formData = new FormData();
+      formData.append("question", question);
+      // formData.append("file", files[0]); // Send the first file for processing
+      if (files.length > 0) {
+        formData.append("file", files[0]); // Send the first file
+      }
+
+      const res = await axios.post("http://localhost:3000/ask-ai", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      //const res = await axios.post("http://localhost:3000/ask-ai", { question });
 
       const newResponse = {
         id: new Date().getTime(),
@@ -54,27 +62,27 @@ const Upload = () => {
 
       setConversations((prev) => [...prev, newResponse]);
       setQuestion("");
-   
     } catch (error) {
       console.error("GPT API Error:", error);
-     
     } finally {
       setFetching(false);
     }
   };
 
-// Recursive function to render threaded Q&A
-const renderConversations = (convos, parentId = null) => {
-  return convos.map((conv) => (
-    <div key={conv.id} className=" rounded-lg bg-gray-50 mt-2">
-      <div className="flex items-center">
-        <span className="font-bold">{conv.question}</span>
+  // Recursive function to render threaded Q&A
+  const renderConversations = (convos, parentId = null) => {
+    return convos.map((conv) => (
+      <div key={conv.id} className=" rounded-lg bg-gray-50 mt-2">
+        <div className="flex items-center">
+          <span className="font-bold">{conv.question}</span>
+        </div>
+        <div className="ml-2">{conv.answer}</div>
+        <div className="ml-2">
+          {renderConversations(conv.subQuestions, conv.id)}
+        </div>
       </div>
-      <div className="ml-2">{conv.answer}</div>
-      <div className="ml-2">{renderConversations(conv.subQuestions, conv.id)}</div>
-    </div>
-  ));
-};
+    ));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,7 +90,7 @@ const renderConversations = (convos, parentId = null) => {
       setError("No files selected");
       return;
     }
-   
+
     const formData = new FormData();
     files.forEach((file) => formData.append("photos", file));
 
@@ -128,7 +136,10 @@ const renderConversations = (convos, parentId = null) => {
             </button>
           </div>
         </form>
+       
+        {/* Preview Section */}
         <div className="flex w-full max-w-4xl space-x-6">
+          {/* Left Side: File Preview */}
           <div className="w-1/2 border p-2 bg-white rounded-lg">
             {previews.length > 0 && (
               <div>
@@ -167,21 +178,21 @@ const renderConversations = (convos, parentId = null) => {
             <div className="flex-1 overflow-auto space-y-4 p-4 border rounded-lg bg-gray-50 h-[500px]">
               {conversations.map((conv) => (
                 <div key={conv.id} className="flex flex-col space-y-2">
-                {conv.question && (
-                  <div className="flex justify-end">
-                    <div className="bg-gray-500 text-black p-3 rounded-lg max-w-xs text-right">
-                      {conv.question}
+                  {conv.question && (
+                    <div className="flex justify-end">
+                      <div className="bg-blue-500 text-black p-3 rounded-lg max-w-xs text-right">
+                        {conv.question}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {conv.answer && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-300 text-black p-3 rounded-lg max-w-xs text-left">
-                      {conv.answer}
+                  )}
+                  {conv.answer && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-300 text-black p-3 rounded-lg max-w-xs text-left">
+                        {conv.answer}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
               ))}
               {fetching && <p className="text-gray-500">AI is thinking...</p>}
             </div>
