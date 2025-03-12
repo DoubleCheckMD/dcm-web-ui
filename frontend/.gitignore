@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Ignore the frontend folder
-frontend/
+.frontend/
