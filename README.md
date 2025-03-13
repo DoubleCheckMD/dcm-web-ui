@@ -1,5 +1,3 @@
-# RNM Auth
-
 This project is a React application built with Vite. It includes user authentication features such as registration, login, password reset, and file upload functionality. The application uses Tailwind CSS for styling and Axios for making HTTP requests.
 
 ## Getting Started
