@@ -7,6 +7,8 @@ import Upload from './pages/Upload';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import React from 'react';
+import ViewAllPhotos from './pages/ViewAllPhotos';
+import FileDetails from "./components/FileDetails";
 
 
 function App() {
@@ -21,6 +23,8 @@ function App() {
           <Route path='/success' element={<Success />} />
           <Route path='/forgot-password' element={<ForgotPassword />} />
           <Route path='/reset-password/:token' element={<ResetPassword />} />
+          <Route path="/view-all" element={<ViewAllPhotos />} />
+          <Route path="/file-details" element={<FileDetails />} />
         </Routes>
       </BrowserRouter>
      
