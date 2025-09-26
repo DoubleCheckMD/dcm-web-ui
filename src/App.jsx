@@ -9,6 +9,7 @@ import ResetPassword from './pages/ResetPassword';
 import React from 'react';
 import ViewAllPhotos from './pages/ViewAllPhotos';
 import FileDetails from "./components/FileDetails";
+import TellyConsultantsPage from './pages/TellyConsultants';
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path='/reset-password/:token' element={<ResetPassword />} />
           <Route path="/view-all" element={<ViewAllPhotos />} />
           <Route path="/file-details" element={<FileDetails />} />
+          <Route path="/create-case" element={<TellyConsultantsPage />} />
         </Routes>
       </BrowserRouter>
      

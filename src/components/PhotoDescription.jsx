@@ -48,7 +48,15 @@ const PhotoDescription = ({ photos, loading }) => {
   };
 
   return (
-   <div className="bg-white rounded-lg shadow p-6">
+   <div className="border rounded-lg shadow p-6"
+   style={{
+    backgroundColor: "#f9f9f9",
+    border: "1px solid #e0e0e0",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    borderRadius: "8px",
+    padding: "24px",
+    margin: "16px",
+   }}>
       <h1 className="text-xl font-bold">Photo Descriptions</h1>
       <div className="mb-4">
         <input
@@ -60,53 +68,42 @@ const PhotoDescription = ({ photos, loading }) => {
         />
       </div>
 
-      <div className="notebook-style">
-        {/* Table Header */}
-        <div className="grid grid-cols-3 gap-4 p-2 bg-gray-100 rounded">
-          <div>
-            <strong>Filename</strong>
-          </div>
-          <div>
-            <strong>Date</strong>
-          </div>
-          <div>
-            <strong>Category</strong>
-          </div>
-          {/* <div>
-            <strong>Size</strong>
-          </div> */}
-        </div>
-
-        {/* Table Rows */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {displayedPhotos.map((photo, index) => (
-          <div key={index} className="grid grid-cols-3 gap-4 p-2 border-b">
-            <div>
-              <button
-                onClick={() => handlePhotoClick(photo)}
-                className="text-blue-400 hover:underline"
-              >
-                {/* {photo.filename || "Unnamed File"} */}
-                {trimFilename(photo.filename || "Unnamed File")}
-              </button>
-            </div>
-            <div>{photo.date ? new Date(photo.date).toLocaleString() : "Unknown Date"}</div>
-            {/* <div>{photo.size ? `${(photo.size / 1024 / 1024).toFixed(2)} MB` : "Unknown Size"}</div> */}
-            <div>{photo.category || "Uncategorized"}</div>
+          <div
+            key={index}
+            className="border rounded p-4 hover:shadow-md transition-shadow duration-300"
+          >
+            <button
+              onClick={() => handlePhotoClick(photo)}
+              className="text-blue-400 hover:underline block mb-2"
+            >
+              {trimFilename(photo.filename || "Unnamed File")}
+            </button>
+            <p>
+              <strong>Date:</strong>{" "}
+              {photo.date ? new Date(photo.date).toLocaleString() : "Unknown Date"}
+            </p>
+            <p>
+              <strong>Category:</strong> {photo.category || "Uncategorized"}
+            </p>
           </div>
         ))}
+      </div>
 
-
-        {photos.length > 10 && !searchTerm && (
+      {photos.length > 10 && !searchTerm && (
+        <div className="mt-4">
           <button
             onClick={() => navigate("/view-all", { state: { photos } })}
-            className="text-blue-400 hover:underline mt-4"
+            className="text-blue-400 hover:underline"
           >
             View All
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
 
+    
 export default PhotoDescription;
