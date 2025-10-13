@@ -4,31 +4,63 @@ import axios from "axios";
 import UserProfileHeader from "../components/UserProfileHeader";
 import useFetchUser from "../utils/useFetchUser";
 
+
+// Modern back-to-home button (merge into this file)
+const BackToHomeButton = ({ to = "/" }) => {
+  const goHome = (e) => {
+    e.preventDefault();
+    // Prefer SPA navigation if your app/router provides it; fallback to full navigation
+    try {
+      // If you're using react-router, replace this with: const navigate = useNavigate(); navigate(to);
+      window.location.href = to;
+    } catch {
+      window.location.href = to;
+    }
+  };
+   return (
+    <button
+      onClick={goHome}
+      aria-label="Back to home"
+      className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full shadow-md hover:from-indigo-600 hover:to-purple-600 transition focus:outline-none focus:ring-2 focus:ring-indigo-300"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3" />
+      </svg>
+      <span className="font-medium">Back to Home</span>
+    </button>
+  );
+};
+
 export default function TellyConsultantsPage() {
   const [formData, setFormData] = useState({});
   const [files, setFiles] = useState([]);
-  const [isHumanProblemsModalOpen, setIsHumanProblemsModalOpen] = useState(false);
-  const [bodyProblems, setBodyProblems] = useState([]);
+  const [problemDetails, setProblemDetails] = useState("");
+  const [previousHistory, setPreviousHistory] = useState("");
   const [comorbidities, setComorbidities] = useState("");
   const user = useFetchUser();
 
-  const handleSaveBodyProblems = (data) => {
-    setBodyProblems(data);
-  };
 
   const handleComorbiditiesChange = (e) => {
     setComorbidities(e.target.value);
   };
 
+   const handleProblemDetailsChange = (e) => {
+    setProblemDetails(e.target.value);
+  };
+
+  const handlePreviousHistoryChange = (e) => {
+    setPreviousHistory(e.target.value);
+  };
+
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    setFiles([...files, ...selectedFiles]);
+    setFiles((prev) => [...prev, ...selectedFiles]);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     const droppedFiles = Array.from(e.dataTransfer.files);
-    setFiles([...files, ...droppedFiles]);
+   setFiles((prev) => [...prev, ...droppedFiles]);
   };
 
   const handleDragOver = (e) => {
@@ -37,17 +69,22 @@ export default function TellyConsultantsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formDataToSend = {
+    // build payload
+    const payload = {
       ...formData,
-      selectedBodyParts: bodyProblems.selectedBodyParts?.join(", "),
-      problemDetails: bodyProblems.problemDetails,
-      comorbidities: comorbidities,
+      problemDetails: problemDetails || "",
+      comorbidities: comorbidities || "",
+      previousHistory: previousHistory || "",
     };
 
     const form = new FormData();
-    for (const key in formDataToSend) {
-      form.append(key, formDataToSend[key]);
-    }
+    Object.keys(payload).forEach((key) => {
+      const val = payload[key];
+      if (val !== undefined && val !== null && val !== "") {
+        form.append(key, val);
+      }
+    });
+
     files.forEach((file) => form.append("files", file));
 
     try {
@@ -73,30 +110,51 @@ export default function TellyConsultantsPage() {
   const handleReset = () => {
     setFormData({});
     setFiles([]);
-    setBodyProblems({ selectedBodyParts: [], problemDetails: "" });
     setComorbidities("");
+    setProblemDetails("");
+    setPreviousHistory("");
   };
 
-  const handleRemoveFile = (index) => {
-    const newFiles = [...files];
-    newFiles.splice(index, 1);
-    setFiles(newFiles);
+  // const handleRemoveFile = (index) => {
+  //   const newFiles = [...files];
+  //   newFiles.splice(index, 1);
+  //   setFiles(newFiles);
+  // };
+
+   const handleRemoveFile = (index) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const openHumanProblemsModal = () => {
-    setIsHumanProblemsModalOpen(true);
-  };
-
-  const closeHumanProblemsModal = () => {
-    setIsHumanProblemsModalOpen(false);
-  };
 
   return (
     <div className="min-h-screen bg-gray-100">
       <UserProfileHeader user={user} />
-      <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow mt-6">
-        <h2 className="text-3xl font-bold text-center mb-6">Telly Consultant</h2>
+      {/* <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow mt-6">
+        <h2 className="text-3xl font-bold text-center mb-6">Telly Consultant</h2> */}
+
+ <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow mt-6">
+        {/* Top row: back button and page title */}
+        <div className="flex items-center justify-between mb-4">
+          <BackToHomeButton to="/" />
+          <h2 className="text-2xl font-semibold text-gray-700">Telly Consultant</h2>
+        </div>
+
+
         <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* Problem Details Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Problem Details</label>
+            <textarea
+              name="problemDetails"
+              value={problemDetails}
+              onChange={handleProblemDetailsChange}
+              className="mt-1 p-3 w-full border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter any more medical conditions..."
+            />
+          </div>
+
+
           {/* Comorbidities Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Comorbidities</label>
@@ -105,44 +163,23 @@ export default function TellyConsultantsPage() {
               value={comorbidities}
               onChange={handleComorbiditiesChange}
               className="mt-1 p-3 w-full border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter any more about comorbidities medical conditions..."
+            />
+          </div>
+
+           {/* Previous History Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Previous History</label>
+            <textarea
+              name="previousHistory"
+              value={previousHistory}
+              onChange={handlePreviousHistoryChange}
+              className="mt-1 p-3 w-full border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter any existing medical conditions..."
             />
           </div>
 
-          {/* Patient's Complaint/Problems Field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Patient's Complaint/Problems
-            </label>
-            <button
-              type="button"
-              onClick={openHumanProblemsModal}
-              className="mt-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 shadow"
-            >
-              Add Body Problems
-            </button>
-          </div>
-
-          {/* Human Problems Modal */}
-          {isHumanProblemsModalOpen && (
-            <HumanProblemsModal
-              onClose={closeHumanProblemsModal}
-              onSave={handleSaveBodyProblems}
-            />
-          )}
-
-          {bodyProblems.selectedBodyParts?.length > 0 && (
-            <div className="p-4 bg-gray-50 border rounded-lg">
-              <h3 className="font-semibold">Body Problems:</h3>
-              <p>
-                <strong>Parts:</strong> {bodyProblems.selectedBodyParts.join(", ")}
-              </p>
-              <p>
-                <strong>Details:</strong> {bodyProblems.problemDetails}
-              </p>
-            </div>
-          )}
-
+         
           {/* File Upload Section */}
           <div
             className="p-4 border-2 border-dashed rounded-lg text-center bg-gray-50"
