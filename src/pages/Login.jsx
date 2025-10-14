@@ -34,11 +34,7 @@ const Login = () => {
         <h2 className="text-lg font-bold mb-4">Login</h2>
         <form onSubmit={handleSumbit}>
           <div className="mb-4">
-            {/* <label htmlFor="email" className='block text-gray-700'>Email</label>
-                    <input type="email" placeholder='Enter Email' className='w-full px-3 py-2 border'
-                    name="email" onChange={handleChanges}/> */}
-
-            <label htmlFor="identifier" className="block text-gray-700">
+                       <label htmlFor="identifier" className="block text-gray-700">
               Email/Phone/Username
             </label>
             <input

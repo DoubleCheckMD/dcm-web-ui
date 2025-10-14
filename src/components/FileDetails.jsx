@@ -71,35 +71,6 @@ const FileDetails = () => {
   };
 
 
-//     const handleDocOpen = () => {
-
-//  if (!dataStr.includes(",")) {
-//       console.error("No base64 payload available to open document.");
-//       return;
-//     }
-
-        // Extract the base64 data from the data URL
-    //     const base64Data = file.data.split(",")[1];
-    //     // Decode the base64 data into a Uint8Array
-    //     const byteCharacters = atob(base64Data);
-    //     const byteArrays = [];
-    
-    //     for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-    //         const slice = byteCharacters.slice(offset, offset + 512);
-    //         const byteNumbers = new Array(slice.length);
-    //         for (let i = 0; i < slice.length; i++) {
-    //             byteNumbers[i] = slice.charCodeAt(i);
-    //         }
-    //         const byteArray = new Uint8Array(byteNumbers);
-    //         byteArrays.push(byteArray);
-    //     }
-    
-    //    // const blob = new Blob(byteArrays, { type: file.type });
-    //        const blob = new Blob(byteArrays, { type: typeStr || "application/octet-stream" });
-    //     const blobUrl = URL.createObjectURL(blob);
-    //     window.open(blobUrl, "_blank");
-    // };
-
 
     const handleDownload = () => {
     const url = createBlobUrl();
@@ -127,11 +98,6 @@ const FileDetails = () => {
     <div className="flex flex-col items-center p-4">
       <h1 className="text-2xl font-bold mb-4">File Details</h1>
       <p className="mb-4">File Name: {file.filename}</p>
-      {/* <img
-        src={file.data} // Use the base64-encoded image data directly
-        alt={file.filename}
-        className="max-w-full h-auto"
-      /> */}
 
       {/* Render content based on file type */}
       {isImage && (
@@ -142,14 +108,6 @@ const FileDetails = () => {
         />
       )}
 
-      {/* {isPDF && (
-        <iframe
-          src={file.data}
-          title={file.filename}
-          className="w-full h-96 border"
-        />
-      )} */}
-
         {isPDF && (
         // prefer blob URL for PDF rendering (more reliable than huge data: URLs)
         <iframe
@@ -158,19 +116,6 @@ const FileDetails = () => {
           className="w-full h-96 border"
         />
       )}
-
-      {/* {isDoc && (
-        <button
-          onClick={handleDocOpen}
-          className="text-blue-500 hover:underline"
-        >
-          Open {file.filename}
-        </button>
-      )}
-
-      {!isImage && !isPDF && !isDoc && (
-        <p className="text-red-500">Unsupported file type.</p>
-      )} */}
 
        {isDoc && (
         <div className="flex flex-col items-center gap-2">

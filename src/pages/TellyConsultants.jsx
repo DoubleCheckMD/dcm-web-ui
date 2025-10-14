@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import HumanProblemsModal from "./HumanProblemsModal";
 import axios from "axios";
 import UserProfileHeader from "../components/UserProfileHeader";
 import useFetchUser from "../utils/useFetchUser";
