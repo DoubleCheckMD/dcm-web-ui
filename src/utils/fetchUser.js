@@ -1,17 +1,12 @@
-import axios from 'axios';
+import { authService } from '../services';
 
 export const fetchUser = async () => {
   try {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!authService.isAuthenticated()) {
       throw new Error('No token found');
     }
 
-    const response = await axios.get('http://localhost:3000/auth/home', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await authService.getCurrentUser();
 
     if (response.status === 201) {
       return response.data.user;
