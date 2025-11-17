@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'dcm-web-ui/**'
   workflow_dispatch:
 
 jobs:
@@ -21,14 +19,12 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: dcm-web-ui/package-lock.json
+          cache-dependency-path: package-lock.json
       
       - name: Install dependencies
-        working-directory: dcm-web-ui
         run: npm ci
       
       - name: Build application
-        working-directory: dcm-web-ui
         run: npm run build
       
       - name: Configure AWS credentials
@@ -39,7 +35,6 @@ jobs:
           aws-region: us-east-1
       
       - name: Sync files to S3
-        working-directory: dcm-web-ui
         run: |
           aws s3 sync dist/ s3://${{ secrets.DEV_S3_BUCKET }} --delete \
             --cache-control "max-age=31536000,public" \
